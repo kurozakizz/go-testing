@@ -1,0 +1,14 @@
+[
+  {
+    "_id" : "5a1bedc587b1e36922587364",
+    "name": "Pikachu",
+    "weight": 39,
+    "element": "Electric"
+  },
+  {
+    "_id" : "5a1bedc587b1e36922587365",
+    "name": "Mew",
+    "weight": 51,
+    "element": "Psy"
+  }
+]
