@@ -27,6 +27,14 @@ func TestAll(t *testing.T){
 			StatusCode: http.StatusNotFound,
 			Body: `"not found"`,
 		},
+		{
+			Fn: func (w http.ResponseWriter, r *http.Request) {
+				data := map[string]interface{}{"name":"Go Kurozakizz"}
+				With(w, r, http.StatusCreated, data)
+			},
+			StatusCode: http.StatusCreated,
+			Body: `{"name":"Go Kurozakizz"}`,
+		},
 	}
 
 	for _, test := range tests {
