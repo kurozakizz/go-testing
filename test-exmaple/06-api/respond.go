@@ -7,9 +7,9 @@ import (
 )
 
 func transform (data interface{}) interface{} {
-	switch data.(type) {
+	switch o := data.(type) {
 	case error:
-		data = map[string]interface{}{"error": data}
+		data = map[string]interface{}{"error": o.Error}
 	}
 	return data
 }
@@ -17,7 +17,6 @@ func transform (data interface{}) interface{} {
 func With(w http.ResponseWriter, r *http.Request, status int, data interface{}) {
 
 	data = transform(data)
-
 	b, err := json.Marshal(data)
 	if err != nil {
 		With(w, r, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
