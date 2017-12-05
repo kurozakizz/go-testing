@@ -16,7 +16,7 @@ func (s StubInputServicer) Data(url string) ([]byte, error) {
 	return nil, fmt.Errorf("Error")
 }
 
-func TestFetchToGetByteArray(t *testing.T) {
+func TestFetch_String_ShoulReturn_ByteArray(t *testing.T) {
 	reader := Reader{
 		Servicer: StubInputServicer{},
 	}
@@ -33,7 +33,7 @@ func TestFetchToGetByteArray(t *testing.T) {
 	}
 }
 
-func TestFetchToReturnError(t *testing.T) {
+func TestFetch_EmptyString_ShoulReturn_Error(t *testing.T) {
 	reader := Reader{
 		Servicer: StubInputServicer{},
 	}
