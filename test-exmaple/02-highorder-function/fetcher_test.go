@@ -8,7 +8,7 @@ var data = func(url string) (string, error) {
 	return url, nil
 }
 
-func TestFetch(t *testing.T) {
+func TestFetch_Test_ShouldReturn_Test(t *testing.T) {
 	actualResult, err :=fetchData(data, "Test")
 	if err != nil {
 		t.Fatal("Expected no error")
