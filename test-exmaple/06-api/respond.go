@@ -6,8 +6,19 @@ import (
 	"net/http"
 )
 
-func With(w http.ResponseWriter, r *http.Request, status int, body interface{}) {
-	b, err := json.Marshal(body)
+func transform (data interface{}) interface{} {
+	switch data.(type) {
+	case error:
+		data = map[string]interface{}{"error": data}
+	}
+	return data
+}
+
+func With(w http.ResponseWriter, r *http.Request, status int, data interface{}) {
+
+	data = transform(data)
+
+	b, err := json.Marshal(data)
 	if err != nil {
 		With(w, r, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
 		return
