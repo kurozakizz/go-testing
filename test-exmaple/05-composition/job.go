@@ -1,83 +1,118 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 )
 
-type Job interface {
+type Logger interface {
 	Log(...interface{})
+}
+
+type SuspendResumer interface {
 	Suspend() error
 	Resume() error
+}
+
+type Job interface {
+	Logger
+	SuspendResumer
 	Run() error
 }
 
-type PollerJob struct {
-	suspend     chan bool
-	resume      chan bool
-	resourceUrl string
-	inMemLog    string
+type ServerPoller interface {
+	PollServer() (string, error)
 }
 
-func NewPollerJob(resourceUrl string) PollerJob {
+type PollerLogger struct{}
+
+type URLServerPoller struct {
+	resourceUrl string
+}
+
+type PollSuspendResumer struct {
+	SuspendCh chan bool
+	ResumeCh  chan bool
+}
+
+type PollerJob struct {
+	WaitDuration time.Duration
+	ServerPoller
+	Logger
+	*PollSuspendResumer
+}
+
+func NewPollerJob(resourceUrl string, waitDuration time.Duration) PollerJob {
 	return PollerJob{
-		resourceUrl: resourceUrl,
-		suspend:     make(chan bool),
-		resume:      make(chan bool),
+		WaitDuration: waitDuration,
+		Logger:       &PollerLogger{},
+		ServerPoller: &URLServerPoller{
+			resourceUrl: resourceUrl,
+		},
+		PollSuspendResumer: &PollSuspendResumer{
+			SuspendCh: make(chan bool),
+			ResumeCh:  make(chan bool),
+		},
 	}
 }
 
-func (p PollerJob) Log(args ...interface{}) {
+func (l *PollerLogger) Log(args ...interface{}) {
 	log.Println(args...)
 }
 
-func (p PollerJob) Suspend() error {
-	p.suspend <- true
+func (usp *URLServerPoller) PollServer() (string, error) {
+	resp, err := http.Get(usp.resourceUrl)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprint(usp.resourceUrl, " -- ", resp.Status), nil
+}
+
+func (ssr *PollSuspendResumer) Suspend() error {
+	ssr.SuspendCh <- true
 	return nil
 }
 
-func (p PollerJob) PollServer() error {
-	resp, err := http.Get(p.resourceUrl)
-	if err != nil {
-		return err
-	}
-
-	p.Log(p.resourceUrl, "--", resp.Status)
-
+func (ssr *PollSuspendResumer) Resume() error {
+	ssr.ResumeCh <- true
 	return nil
 }
 
 func (p PollerJob) Run() error {
 	for {
 		select {
-		case <-p.suspend:
-			<-p.resume
+		case <-p.PollSuspendResumer.SuspendCh:
+			<-p.PollSuspendResumer.ResumeCh
 		default:
-			if err := p.PollServer(); err != nil {
-				p.Log("Error trying to get resource: ", err)
+			state, err := p.PollServer()
+			if err != nil {
+				p.Log("Error trying to get state: ", err)
+			} else {
+				p.Log(state)
 			}
-			time.Sleep(1 * time.Second)
+
+			time.Sleep(p.WaitDuration)
 		}
 	}
-}
 
-func (p PollerJob) Resume() error {
-	p.resume <- true
 	return nil
 }
 
 func main() {
-	p := NewPollerJob("https://nathanleclaire.com")
-	go p.Run()
+	var j Job
+	j = NewPollerJob("http://nathanleclaire.com", 1*time.Second)
+	go j.Run()
 	time.Sleep(5 * time.Second)
 
-	p.Log("Suspending monitoring of server for 5 seconds...")
-	p.Suspend()
+	j.Log("Suspending monitoring of server for 5 seconds...")
+	j.Suspend()
 	time.Sleep(5 * time.Second)
 
-	p.Log("Resuming job...")
-	p.Resume()
+	j.Log("Resuming job...")
+	j.Resume()
 
 	// Wait for a bit before exiting
 	time.Sleep(5 * time.Second)
