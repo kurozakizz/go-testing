@@ -17,8 +17,15 @@ func TestAll(t *testing.T){
 			Fn: func (w http.ResponseWriter, r *http.Request) {
 				With(w, r, http.StatusOK, "Hello world")
 			},
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body: `"Hello world"`,
+		},
+		{
+			Fn: func (w http.ResponseWriter, r *http.Request) {
+				With(w, r, http.StatusNotFound, "not found")
+			},
+			StatusCode: http.StatusNotFound,
+			Body: `"not found"`,
 		},
 	}
 

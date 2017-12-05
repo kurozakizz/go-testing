@@ -13,6 +13,7 @@ func With(w http.ResponseWriter, r *http.Request, status int, body interface{}) 
 		return
 	}
 
+	w.WriteHeader(status)
 	if _, err := w.Write(b); err != nil {
 		log.Fatalln("failed to write:", err)
 	}
