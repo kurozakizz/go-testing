@@ -1,8 +1,8 @@
 # 01-dependency
 
-# 02-highorder-function
+# 02-high order function
 
-# 03-httphandler
+# 03-http handler
 
 # 04-interface
 
