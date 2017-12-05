@@ -21,12 +21,11 @@ func TestFetch_String_ShoulReturn_ByteArray(t *testing.T) {
 		Servicer: StubInputServicer{},
 	}
 
+	expectedResult := []byte("getInput")
 	actualResult, err := reader.Fetch("getInput")
 	if err != nil {
 		t.Fatal("Expected no error")
 	}
-
-	expectedResult := []byte("getInput")
 
 	if !reflect.DeepEqual(expectedResult, actualResult) {
 		t.Fatalf("Expected %v but got %v", expectedResult, actualResult)
@@ -40,11 +39,12 @@ func TestFetch_EmptyString_ShoulReturn_Error(t *testing.T) {
 
 	expectedResult := "Unable to fetch the data from url : Error"
 	actualResult, err := reader.Fetch("")
-	if err != nil && err.Error() != expectedResult {
-		t.Fatal("Error message is not expected")
-	}
 
 	if actualResult != nil {
 		t.Fatal("actualResult must be nil")
+	}
+
+	if err != nil && err.Error() != expectedResult {
+		t.Fatal("Error message is not expected")
 	}
 }
