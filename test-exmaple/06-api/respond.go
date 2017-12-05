@@ -9,7 +9,8 @@ import (
 func With(w http.ResponseWriter, r *http.Request, status int, body interface{}) {
 	b, err := json.Marshal(body)
 	if err != nil {
-
+		With(w, r, http.StatusInternalServerError, map[string]interface{}{"error": err.Error()})
+		return
 	}
 
 	if _, err := w.Write(b); err != nil {
