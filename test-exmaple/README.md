@@ -6,6 +6,10 @@
 
 # 04-interface
 
+# 05-composition
+
+# 06-api
+
 ![04-interface](https://raw.githubusercontent.com/kurozakizz/go-testing/master/screenshots/04-interface.jpg)
 
 # References
